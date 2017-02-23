@@ -1,0 +1,50 @@
+<form name="config">
+  <fieldset>
+    <legend>Field Properties</legend>
+    <div class="form-group">
+      <label>Field Name *</label>
+      <input type="text" class="form-control" name="fieldname" placeholder="Field Name" required>
+    </div>
+    <div class="form-group">
+      <label>Available Options</label>
+      <table class="table table-striped option-table">
+        <thead>
+        <tr>
+          <th>Option</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+        <tfoot>
+        <tr>
+          <td>
+            <input class="form-control" type="text" placeholder="Write a new option">
+          </td>
+          <td>
+            <button type="button" class="btn btn-default add-option"><i class="fa fa-plus"></i> Add</button>
+          </td>
+        </tr>
+        </tfoot>
+      </table>
+    </div>
+  </fieldset>
+  <hr>
+  <fieldset>
+    <legend>Field Validation</legend>
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" name="required"> is required
+      </label>
+    </div>
+  </fieldset>
+  <hr>
+  <fieldset>
+    <legend>Field Appearance</legend>
+    <div class="form-group">
+      <label>Field Label *</label>
+      <input type="text" class="form-control" name="textlabel" required>
+    </div>
+  </fieldset>
+</form>

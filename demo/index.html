@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../node_modules/bootstrap/dist/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="../node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+            <div class="jfc-container"></div>
+        </div>
+    </div>
+</div>
+
+
+<script id="hidden-template" type="text/x-custom-template">
+    <div class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Form field configuration</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="select-form-field-type"> <!-- Form Field type Select -->
+                        <h3>Select a form field type</h3>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="well text-center select-type-field" data-type="input-data">
+                                    <img src="../resources/input_data_field.png" width="80">
+                                    <br>
+                                    Input Data
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="well text-center select-type-field" data-type="option-list">
+                                    <img src="../resources/option_list_field.png" width="80">
+                                    <br>
+                                    Option List
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="well text-center select-type-field" data-type="check-list">
+                                    <img src="../resources/check_list_field.png" width="80">
+                                    <br>
+                                    Check List
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="well text-center select-type-field" data-type="text">
+                                    <img src="../resources/text_field.png" width="80">
+                                    <br>
+                                    Text
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="well text-center select-type-field" data-type="button">
+                                    <img src="../resources/button_field.png" width="80">
+                                    <br>
+                                    Submit Button
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!--  END Form Field type Select -->
+                    <div class="form-field-configure" style="display: none">
+                        <h3>Configure Form Field</h3>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary save-changes">Save changes</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <!-- -->
+    <button class="btn btn-success add-button" type="button"><i class="fa fa-plus"></i> Add Form Element</button>
+
+    <table class="table table-striped field-list-table">
+        <thead>
+        <tr>
+            <th>name</th>
+            <th>type</th>
+            <th>validation</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+
+    <!--<button class="btn btn-info preview-button"><i class="fa fa-eye"></i> Preview Form</button>-->
+</script>
+<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+<script src="../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="../jquery-form-creator.js"></script>
+<script>
+    $(document).ready(function(){
+        $('.jfc-container').epform({});
+    });
+</script>
+</body>
+</html>

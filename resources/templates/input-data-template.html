@@ -1,0 +1,51 @@
+<form name="config">
+  <fieldset>
+    <legend>Field Properties</legend>
+    <div class="form-group">
+      <label>Field Name *</label>
+      <input type="text" class="form-control" name="fieldname" placeholder="Field Name">
+    </div>
+    <div class="form-group">
+      <label>Field Type *</label>
+      <select class="form-control" name="fieldtype">
+        <option value="" selected disabled>-- select a type --</option>
+        <option value="text">Text</option>
+        <option value="password">Secret</option>
+      </select>
+    </div>
+  </fieldset>
+  <hr>
+  <fieldset>
+    <legend>Field Validation</legend>
+    <div class="form-group">
+      <label>Type Validation</label>
+      <select class="form-control type-validation" name="typevalidation">
+        <option value="" selected>None</option>
+        <!--<option value="custom">Custom</option>-->
+        <option value="email">Email</option>
+        <option value="number">Number</option>
+      </select>
+    </div>
+    <div class="form-group regular-expresion" style="display: none">
+      <label>Regular Expresion *</label>
+      <input type="text" class="form-control" name="regularexpression" disabled>
+    </div>
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" name="required"> is required
+      </label>
+    </div>
+  </fieldset>
+  <hr>
+  <fieldset>
+    <legend>Field Appearance</legend>
+    <div class="form-group">
+      <label>Field Label *</label>
+      <input type="text" class="form-control" name="textlabel">
+    </div>
+    <div class="form-group">
+      <label>Field Placeholder *</label>
+      <input type="text" class="form-control" name="textplaceholder">
+    </div>
+  </fieldset>
+</form>
