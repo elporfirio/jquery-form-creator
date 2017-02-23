@@ -8,12 +8,14 @@
   },
   "author": "Porfirio Chavez <elporfirio@gmail.com> (http://elporfirio.com)",
   "license": "ISC",
-  "keywords":[
+  "keywords": [
     "jquery-plugin",
     "jquery",
     "form"
   ],
   "dependencies": {
+    "bootstrap": "^3.3.7",
+    "font-awesome": "^4.7.0",
     "jquery": "^3.1.1"
   },
   "repository": {

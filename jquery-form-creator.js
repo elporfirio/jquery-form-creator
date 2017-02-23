@@ -14,6 +14,7 @@
         self.fields = [];
         self.isEdit = false;
         self.currentFieldToEdit = null;
+        self.templatesFolder = '../resources/templates/';
 
         self.tempOptions = [];
 
@@ -23,7 +24,7 @@
          * Inicializa el componente
          */
         self.init = function () {
-            if (settings.fields.length > 0) {
+            if (settings.fields !== undefined && settings.fields.length > 0) {
                 //console.log("### Inicializando para Edición");
                 ////console.info(settings.fields);
                 self.fields = settings.fields;
@@ -250,7 +251,7 @@
                     '<td>' + getFieldValue('fieldname', data.form) + '</td>' +
                     '<td>' + data.type + '<br>' + getFieldValue('fieldtype', data.form) + '</td>' +
                     '<td><span class="label label-info">' + getFieldValue('typevalidation', data.form) + '</span><br>' +
-                    ((getFieldValue('required', data.form) == 'true') ? '<span class="label label-primary">required</span>' : '') + '</td>' +
+                    ((getFieldValue('required', data.form) == 'true') ? '<span class="label label-danger">required</span>' : '') + '</td>' +
                     '<td>' +
                     '   <button class="btn btn-info btn-sm edit-field" data-id="' + data['_id'] + '"> <i class="fa fa-pencil"></i> edit</button>' +
                     '   <button class="btn btn-flat btm-sm remove-field" data-id="' + data['_id'] + '"> <i class="fa fa-remove"></i> remove</button>' +
@@ -263,7 +264,7 @@
                 some.html('<td>' + getFieldValue('fieldname', data.form) + '</td>' +
                     '<td>' + data.type + '<br>' + getFieldValue('fieldtype', data.form) + '</td>' +
                     '<td><span class="label label-info">' + getFieldValue('typevalidation', data.form) + '</span><br>' +
-                    ((getFieldValue('required', data.form) == 'true') ? '<span class="label label-primary">required</span>' : '') + '</td>' +
+                    ((getFieldValue('required', data.form) == 'true') ? '<span class="label label-danger">required</span>' : '') + '</td>' +
                     '<td>' +
                     '   <button class="btn btn-info btn-sm edit-field" data-id="' + id + '"> <i class="fa fa-pencil"></i> edit</button>' +
                     '   <button class="btn btn-flat btm-sm remove-field" data-id="' + id + '"> <i class="fa fa-remove"></i> remove</button>' +
@@ -286,7 +287,7 @@
             var currentTemplate = $('#' + type + '-template').html();
             self.element.find('.form-field-configure').html(currentTemplate);
 
-            self.element.find('.form-field-configure').load('/public/' + type + '-template.html', function () {
+            self.element.find('.form-field-configure').load(self.templatesFolder + type + '-template.html', function () {
 
                 // Special cases
                 if (type == 'input-data') {
