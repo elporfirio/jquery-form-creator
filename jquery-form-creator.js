@@ -3,27 +3,40 @@
  */
 (function ($) {
     $.fn.epform = function (options) {
-        var settings = $.extend({}, options);
+        var settings = $.extend({
+            onAfterFormRender: function () {
+            }
+        }, options);
 
         //properties
         var self = this;
         self.element = null;
         self.divModal = null;
+
+        self.currentFieldType = null;
+        self.tempOptions = [];
+
+
         self.newComponent = true;
-        self.formElementType = null;
         self.fields = [];
         self.isEdit = false;
         self.currentFieldToEdit = null;
         self.templatesFolder = '../resources/templates/';
 
-        self.tempOptions = [];
 
         //public methods
 
         /**
          * Inicializa el componente
          */
-        self.init = function () {
+        self.init = function (selfElement) {
+            self.element = selfElement;
+            self.divModal = self.element.find('.modal').modal({
+                keyboard: false,
+                backdrop: 'static',
+                show: false
+            });
+
             if (settings.fields !== undefined && settings.fields.length > 0) {
                 //console.log("### Inicializando para Edición");
                 ////console.info(settings.fields);
@@ -34,12 +47,20 @@
             setListeners();
         };
 
-        self.hideModal = function () {
+        self.openModal = function () {
+            self.divModal.modal('show');
+        };
+
+        self.closeModal = function () {
             self.divModal.modal('hide');
         };
 
         self.getFields = function () {
             return self.fields;
+        };
+
+        self.getElement = function () {
+            return self.element;
         };
 
         self.removeFieldsForm = function () {
@@ -53,12 +74,19 @@
             });
         }
 
-        function removeFieldByFieldId(fieldId){
-            var result = $.grep(self.fields, function (element, i){
+        function removeFieldByFieldId(fieldId) {
+            var result = $.grep(self.fields, function (element, i) {
                 return element._id != fieldId;
             });
 
             self.fields = result;
+        }
+
+        function addNewField() {
+            showSelectFieldType();
+            self.element.trigger('showing-type-field');
+            self.tempOptions = [];
+            self.openModal();
         }
 
         // private methods
@@ -67,23 +95,23 @@
          **/
         function setListeners() {
             if (self.newComponent) {
-                self.divModal = self.element.find('.modal');
+
 
                 self.element.off();
 
-                self.element.find('.add-button').on('click', function () {
-                    openModal(true);
+                self.element.find('.add-field-button').on('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    addNewField();
                 });
 
                 /** Acciones al mostrarse el cuadro de seleccion de tipo de campo **/
                 self.element.on('showing-type-field', function () {
-                    self.divModal.find('.select-type-field').off('click').on('click', function () {
-                        ////console.log("#### Tipo elegido: ", $(this).data('type'));
-
-                        self.tempOptions = [];
-
-                        formFieldTypeSelected($(this).data('type'));
-                    });
+                    self.divModal.find('.select-type-field')
+                        .off('click')
+                        .on('click', function () {
+                            formFieldTypeSelected($(this).data('type'));
+                        });
                 });
 
                 self.element.find('.field-list-table').off().on('click', '.remove-field', function (e) {
@@ -101,45 +129,69 @@
                     });
 
                 self.element.on('field-added', function (e, data) {
-
-                    //TODO: QUITAR EL FORM ANTES
-                    //self.divModal.find('.modal-body').html('');
-
                     data['_id'] = generateTempId();
                     self.fields.push(data);
                     updateFieldList('add', data);
-
-                    self.divModal.modal('hide');
+                    self.closeModal();
                 });
 
-                self.element.off('form-rendered').on('form-rendered', function(e){
-                    //console.info("EDITIN######", self.currentFieldToEdit);
-                    //this works with input-data
-                    self.tempOptions = [];
-                    if(self.currentFieldToEdit !== null){
-                        $.each(self.currentFieldToEdit.form, function (index, element) {
-                            if(element.field == 'required' && element.value == "true"){
-                                $('[name="' + element.field + '"]').prop('checked', true);
-                            }
-                            else if(element.field == 'options'){
-                                element.value.forEach(function(optval){
-                                    self.tempOptions.push(optval);
+                self.element.on('field-updated', function(e,data){
+                   //TODO: find id and update
+                    updateFieldList();
+                    self.closeModal();
+                });
 
-                                    $('.option-table').find('tbody').append('<tr>' +
-                                        '<td>' + optval + '</td>' +
-                                        '<td> <button class="btn btn-danger btn-remove-option"><i class="fa fa-remove"></i> remove</button></td></tr>');
-                                });
-                            }
-                            else {
-                                $('[name="' + element.field + '"]').val(element.value);
-                            }
-                        });
+                /**
+                 * Actions triggered after render form configuration template
+                 */
+                self.element.off('form-rendered').on('form-rendered', function (e) {
+                    if (typeof settings.onAfterFormRender == 'function') {
+                        settings.onAfterFormRender.call(self);
                     }
-                    self.currentFieldToEdit = null;
+                    showFieldConfiguration();
 
+                    //TODO: VERIFICAR AL EDITAR
+                    // if (self.currentFieldToEdit !== null) {
+                    //     $.each(self.currentFieldToEdit.form, function (index, element) {
+                    //         if (element.field == 'required' && element.value == "true") {
+                    //             $('[name="' + element.field + '"]').prop('checked', true);
+                    //         }
+                    //         else if (element.field == 'options') {
+                    //             element.value.forEach(function (optval) {
+                    //                 self.tempOptions.push(optval);
+                    //
+                    //                 $('.option-table').find('tbody').append('<tr>' +
+                    //                     '<td>' + optval + '</td>' +
+                    //                     '<td> <button class="btn btn-danger btn-remove-option"><i class="fa fa-remove"></i> remove</button></td></tr>');
+                    //             });
+                    //         }
+                    //         else {
+                    //             $('[name="' + element.field + '"]').val(element.value);
+                    //         }
+                    //     });
+                    // }
+                    // self.currentFieldToEdit = null;
                 });
             }
             self.newComponent = false;
+        }
+
+        /**
+         * Show type field selection screen
+         */
+        function showSelectFieldType() {
+            self.element.find('.select-form-field-type').show();
+            self.element.find('.form-field-configure').hide();
+            self.element.find('.cancel-changes').off().on('click', cancelChanges);
+            self.element.find('.save-changes').hide().off();
+        }
+
+        /**
+         * Show configuration form screen
+         */
+        function showFieldConfiguration() {
+            self.element.find('.select-form-field-type').slideUp();
+            self.element.find('.form-field-configure').slideDown();
         }
 
         function fillFieldEdition(fieldId) {
@@ -162,8 +214,7 @@
 
         function openModal(isNew) {
             if (isNew) {
-                self.element.find('.select-form-field-type').show();
-                self.element.find('.form-field-configure').hide();
+
                 self.divModal.modal('show');
                 self.element.trigger('showing-type-field');
             }
@@ -175,13 +226,21 @@
         }
 
 
-        /** corrige los comportamientos de GigSelect para un select comun **/
-        function fixGigSelect() {
-            self.element.find('select').children('option').css('display', 'block');
+        // /** corrige los comportamientos de GigSelect para un select comun **/
+        // function fixGigSelect() {
+        //     self.element.find('select').children('option').css('display', 'block');
+        // }
+
+        function cancelChanges() {
+            self.tempOptions = [];
+            self.currentFieldType = null;
+            self.closeModal();
         }
 
         function saveChanges(e) {
             e.preventDefault();
+            e.stopPropagation();
+
             var formElements = self.element.find('.form-field-configure').find('input, select');
 
             var changes = $.map(formElements, function (element) {
@@ -212,7 +271,7 @@
                 }
             });
 
-            if (self.formElementType == 'option-list' || self.formElementType == 'check-list') {
+            if (self.currentFieldType == 'option-list' || self.currentFieldType == 'check-list') {
                 var options = {
                     field: 'options',
                     value: self.tempOptions
@@ -223,17 +282,14 @@
                 changes.push(options)
             }
 
-            ////console.log('SAVING Changes', changes);
-
-            var csrf = $('#_csrf').val();
-            var changesToSubmit = {form: changes, _csrf: csrf, type: self.formElementType};
-            ////console.log(JSON.stringify({form: changes, _csrf: csrf, type: self.formElementType}));
+            var changesToSubmit = {form: changes, type: self.currentFieldType};
 
 
             if (self.isEdit) {
-                changesToSubmit.type = self.isEdit.type;
-
-                updateFieldList('update', changesToSubmit, self.isEdit.id);
+                // changesToSubmit.type = self.isEdit.type;
+                //
+                // updateFieldList('update', changesToSubmit, self.isEdit.id);
+                self.element.trigger('field-updated', changesToSubmit);
                 self.isEdit = false;
             } else {
                 self.element.trigger('field-added', changesToSubmit);
@@ -258,6 +314,8 @@
                     '</td>' +
                     '</tr>');
             } else if (update == 'update') {
+
+                //TODO: review this
                 var some = tbody.find('button[data-id=' + id + ']').parents('tr');
 
                 //TODO: editType
@@ -280,118 +338,93 @@
             });
 
             //objeto[0].value
-            return (objeto[0] !== undefined) ? objeto[0].value : '';
+            return (objeto[0] !== undefined) ? objeto[0].value.toString() : '';
         }
 
+        /**
+         * Get and render field configuration template by type, and add events
+         * @param type
+         */
         function renderFieldTemplate(type) {
-            var currentTemplate = $('#' + type + '-template').html();
-            self.element.find('.form-field-configure').html(currentTemplate);
+            self.element.find('.form-field-configure')
+                .load(self.templatesFolder + type + '-template.html', function () {
+                    // Special cases
+                    if (type == 'input-data') {
+                        self.element.find('.type-validation').on('change', function () {
+                            //////console.warn($(this).val());
+                            if ($(this).val() === 'custom') {
+                                self.element.find('.regular-expresion').show()
+                                    .find('input').prop('disabled', false);
+                            } else {
+                                self.element.find('.regular-expresion').hide()
+                                    .find('input').prop('disabled', true);
+                            }
+                        });
+                    }
+                    else if (type == 'option-list' || type == 'check-list') {
+                        self.element.find('.option-table').on('click', '.btn-remove-option', function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
 
-            self.element.find('.form-field-configure').load(self.templatesFolder + type + '-template.html', function () {
+                            var parentTR = $(this).parents('tr');
+                            self.tempOptions = $.grep(self.tempOptions, function (element, index) {
+                                //TODO: improve delete by ID
+                                var currentValue = parentTR.find('td').first().text();
+                                return element != currentValue;
+                            });
 
-                // Special cases
-                if (type == 'input-data') {
-                    self.element.find('.type-validation').on('change', function () {
-                        //////console.warn($(this).val());
-                        if ($(this).val() === 'custom') {
-                            self.element.find('.regular-expresion').show()
-                                .find('input').prop('disabled', false);
-                        } else {
-                            self.element.find('.regular-expresion').hide()
-                                .find('input').prop('disabled', true);
-                        }
-                    });
-                } else if (type == 'option-list') {
-                    self.element.find('.option-table').on('click', '.btn-remove-option', function (e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-
-                        var parentTR = $(this).parents('tr');
-                        self.tempOptions = $.grep(self.tempOptions, function(element, index){
-                            //TODO: improve delete by ID
-                            var currentValue = parentTR.find('td').first().text();
-                            return element != currentValue;
+                            //Remove from view
+                            ////console.info(self.tempOptions);
+                            parentTR.remove();
                         });
 
-                        //Remove from view
-                        ////console.info(self.tempOptions);
-                        parentTR.remove();
-                    });
+                        self.element.find('.add-option').on('click', function () {
 
+                            var currentInput = $(this).parents('tr').find('input');
+                            var mewOptionValue = currentInput.val();
+                            //TODO: on save changes add a options field
+                            self.tempOptions.push(mewOptionValue);
+                            currentInput.val('');
 
-                    self.element.find('.add-option').on('click', function () {
-
-                        var currentInput = $(this).parents('tr').find('input');
-                        var mewOptionValue = currentInput.val();
-                        //TODO: on save changes add a options field
-                        self.tempOptions.push(mewOptionValue);
-                        currentInput.val('');
-
-                        $('.option-table').find('tbody').append('<tr>' +
-                            '<td>' + mewOptionValue + '</td>' +
-                            '<td> <button class="btn btn-danger btn-remove-option"><i class="fa fa-remove"></i> remove</button></td></tr>');
-                    });
-                } else if (type == 'check-list') {
-                    self.element.find('.option-table').on('click', '.btn-remove-option', function (e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-
-                        var parentTR = $(this).parents('tr');
-                        self.tempOptions = $.grep(self.tempOptions, function(element, index){
-                            //TODO: improve delete by ID
-                            var currentValue = parentTR.find('td').first().text();
-                            return element != currentValue;
+                            $('.option-table').find('tbody').append('<tr>' +
+                                '<td>' + mewOptionValue + '</td>' +
+                                '<td> <button class="btn btn-danger btn-remove-option"><i class="fa fa-remove"></i> remove</button></td></tr>');
                         });
+                    }
+                    else if (type == 'text') {
+                        //TODO: check special situations
+                    }
+                    else if (type == 'button') {
+                        //TODO: check special situations
+                    }
+                    self.element.find('.save-changes').show().off().on('click', saveChanges);
+                    self.element.find('.cancel-changes').off().on('click', cancelChanges);
 
-                        //Remove from view
-                        ////console.info(self.tempOptions);
-                        parentTR.remove();
-                    });
-
-                    self.element.find('.add-option').on('click', function () {
-
-                        var currentInput = $(this).parents('tr').find('input');
-                        var mewOptionValue = currentInput.val();
-                        //TODO: on save changes add a options field
-                        self.tempOptions.push(mewOptionValue);
-                        currentInput.val('');
-
-                        $('.option-table').find('tbody').append('<tr>' +
-                            '<td>' + mewOptionValue + '</td>' +
-                            '<td> <button class="btn btn-danger btn-remove-option"><i class="fa fa-remove"></i> remove</button></td></tr>');
-                    });
-
-                } else if (type == 'text') {
-
-                } else if (type == 'button') {
-
-                }
-
-                fixGigSelect();
-                self.element.find('.save-changes').off().on('click', saveChanges);
-
-                //WHEN DONE
-                self.element.trigger('form-rendered');
-            });
+                    //WHEN DONE
+                    self.element.trigger('form-rendered');
+                });
 
         }
 
         function formFieldTypeSelected(type) {
-            self.formElementType = type;
+            self.currentFieldType = type;
             renderFieldTemplate(type);
-            self.element.find('.select-form-field-type').slideUp();
-            self.element.find('.form-field-configure').slideDown();
         }
 
         // ADD plugin to each element
         return this.each(function () {
-            var $element = $(this);
-            self.element = $element;
-            var template = $('#hidden-template').html();
-            $element.html(template);
+            var $self = $(this);
 
-            //Inicializar Plugin
-            self.init();
+            console.log('obteniendoTemplate');
+            $.get(self.templatesFolder + 'config-modal-template.html', function (result) {
+
+                var template = result;
+                $self.html(template);
+
+                //Inicializar Plugin
+                self.init($self);
+            });
+
         });
     };
 

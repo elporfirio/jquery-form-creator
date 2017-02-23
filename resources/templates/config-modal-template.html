@@ -1,0 +1,88 @@
+<div class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Form field configuration</h4>
+            </div>
+            <div class="modal-body">
+                <div class="select-form-field-type"> <!-- Form Field type Select -->
+                    <h3>Select a form field type</h3>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="well text-center select-type-field" data-type="input-data" style="cursor: pointer">
+                                <img src="../resources/input_data_field.png" width="80">
+                                <br>
+                                Input Data
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="well text-center select-type-field" data-type="option-list" style="cursor: pointer">
+                                <img src="../resources/option_list_field.png" width="80">
+                                <br>
+                                Option List
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="well text-center select-type-field" data-type="check-list" style="cursor: pointer">
+                                <img src="../resources/check_list_field.png" width="80">
+                                <br>
+                                Check List
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="well text-center select-type-field" data-type="text" style="cursor: pointer">
+                                <img src="../resources/text_field.png" width="80">
+                                <br>
+                                Text
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="well text-center select-type-field" data-type="button" style="cursor: pointer">
+                                <img src="../resources/button_field.png" width="80">
+                                <br>
+                                Submit Button
+                            </div>
+                        </div>
+                    </div>
+                </div> <!--  END Form Field type Select -->
+                <div class="form-field-configure" style="display: none">
+                    <h3>Configure Form Field</h3>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default cancel-changes">Close</button>
+                <button type="button" class="btn btn-primary save-changes" style="display: none;">Save changes</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- -->
+<button class="btn btn-success add-field-button" type="button"><i class="fa fa-plus"></i> Add Form Element</button>
+<button class="btn btn-info" type="button"><i class="fa fa-eye"></i> Preview form</button>
+<br><br>
+
+<table class="table table-striped field-list-table">
+    <thead>
+    <tr>
+        <th>name</th>
+        <th>type</th>
+        <th>validation</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td colspan="4">
+            <div class="alert alert-info text-center">
+                <strong>No fields elements</strong><br>
+                please add one with <i class="fa fa-plus"></i> Add form element button
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
