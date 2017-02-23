@@ -12,10 +12,11 @@
     <div class="row">
         <div class="col-sm-6 col-sm-offset-3">
             <div class="jfc-container"></div>
+
+            <hr>
+            <button class="btn btn-primary" id="save"> SAVE </button>
         </div>
     </div>
-    <hr>
-    <button id="saveMexico"> SAVE TRULY </button>
 </div>
 
 <script src="../node_modules/jquery/dist/jquery.min.js"></script>
@@ -25,10 +26,12 @@
     var jfc;
     $(document).ready(function(){
         jfc = $('.jfc-container').epform({
-            onAfterFormRender: fixGigSelect
+            onAfterFormRender: fixGigSelect,
+            //(optional for Edit) fields: [{"form":[{"field":"fieldname","value":"asdasd"},{"field":"required","value":true},{"field":"textlabel","value":"aasdasd"},{"field":"options","value":["aaaa","ssss","dddd"]}],"type":"option-list","_id":1487878825278}]
         });
 
-        $("#saveMexico").on('click', function () {
+        $("#save").on('click', function () {
+            alert('custom your save');
            console.info(jfc.getFields());
         });
     });
@@ -37,6 +40,9 @@
         var el = this.getElement();
         el.find('select').children('option').css('display', 'block');
     }
+
+    /**[{"form":[{"field":"fieldname","value":"asdasd"},{"field":"required","value":true},{"field":"textlabel","value":"aasdasd"},{"field":"options","value":["aaaa","ssss","dddd"]}],"type":"option-list","_id":1487878825278}]" **/
+
 </script>
 </body>
 </html>

@@ -10,17 +10,19 @@
 
         //properties
         var self = this;
+        self.fields = [];
         self.element = null;
         self.divModal = null;
 
         self.currentFieldType = null;
         self.tempOptions = [];
 
+        //Edicion
+        self.currentFieldToEdit = null;
+
 
         self.newComponent = true;
-        self.fields = [];
         self.isEdit = false;
-        self.currentFieldToEdit = null;
         self.templatesFolder = '../resources/templates/';
 
 
@@ -38,8 +40,6 @@
             });
 
             if (settings.fields !== undefined && settings.fields.length > 0) {
-                //console.log("### Inicializando para Edición");
-                ////console.info(settings.fields);
                 self.fields = settings.fields;
                 paintAllFieldsOnList();
             }
@@ -68,8 +68,12 @@
         };
 
         function paintAllFieldsOnList() {
-            $.each(self.fields, function (index, element) {
-                element['_id'] = generateTempId(); //ID se require para saber que elemento se esta actualizando
+            var tmp = $.map(self.fields, function(field){
+                field._id = generateTempId();
+                return field;
+            });
+            self.fields = tmp;
+            $.each(tmp, function (index, element) {
                 updateFieldList('add', element);
             });
         }
@@ -80,12 +84,24 @@
             });
 
             self.fields = result;
+
+            if(self.fields.length == 0){
+                self.element.find('.field-list-table').find('tbody').find('.alert-info').parent().show();
+            }
         }
 
         function addNewField() {
             showSelectFieldType();
             self.element.trigger('showing-type-field');
             self.tempOptions = [];
+            self.openModal();
+        }
+
+        function editField(id){
+            self.currentFieldToEdit = getFieldconfiguration(id);
+            self.currentFieldType = self.currentFieldToEdit.type;
+            renderFieldTemplate(self.currentFieldType);
+            //showFieldConfiguration();  Este se activa al terminar el renderizado
             self.openModal();
         }
 
@@ -114,18 +130,19 @@
                         });
                 });
 
-                self.element.find('.field-list-table').off().on('click', '.remove-field', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    //console.error('eliminando', $(this).data('id'));
-                    removeFieldByFieldId($(this).data('id'));
-                    $(this).parents('tr').remove();
-                })
+                self.element.find('.field-list-table').off()
+                    .on('click', '.remove-field', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        //console.error('eliminando', $(this).data('id'));
+                        removeFieldByFieldId($(this).data('id'));
+                        $(this).parents('tr').remove();
+                    })
                     .on('click', '.edit-field', function (e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        ////console.info('editando', $(this).data('id'));
-                        fillFieldEdition($(this).data('id'));
+                        editField($(this).data('id'));
+                        //fillFieldEdition($(this).data('id'));
                     });
 
                 self.element.on('field-added', function (e, data) {
@@ -137,7 +154,8 @@
 
                 self.element.on('field-updated', function(e,data){
                    //TODO: find id and update
-                    updateFieldList();
+                    updateFields(data.updated, data.current);
+                    updateFieldList('update', data.updated, data.current._id);
                     self.closeModal();
                 });
 
@@ -148,32 +166,47 @@
                     if (typeof settings.onAfterFormRender == 'function') {
                         settings.onAfterFormRender.call(self);
                     }
+                    if(self.currentFieldToEdit != null){
+                        fillFieldConfiguration();
+                    }
                     showFieldConfiguration();
-
-                    //TODO: VERIFICAR AL EDITAR
-                    // if (self.currentFieldToEdit !== null) {
-                    //     $.each(self.currentFieldToEdit.form, function (index, element) {
-                    //         if (element.field == 'required' && element.value == "true") {
-                    //             $('[name="' + element.field + '"]').prop('checked', true);
-                    //         }
-                    //         else if (element.field == 'options') {
-                    //             element.value.forEach(function (optval) {
-                    //                 self.tempOptions.push(optval);
-                    //
-                    //                 $('.option-table').find('tbody').append('<tr>' +
-                    //                     '<td>' + optval + '</td>' +
-                    //                     '<td> <button class="btn btn-danger btn-remove-option"><i class="fa fa-remove"></i> remove</button></td></tr>');
-                    //             });
-                    //         }
-                    //         else {
-                    //             $('[name="' + element.field + '"]').val(element.value);
-                    //         }
-                    //     });
-                    // }
-                    // self.currentFieldToEdit = null;
                 });
             }
             self.newComponent = false;
+        }
+
+        function updateFields(updated, current){
+            var id = current._id;
+            updated._id = id;
+
+            var tmp = $.map(self.fields, function(field){
+                if(field._id == id){
+                    return updated;
+                }
+                return field;
+            });
+
+            self.fields = tmp;
+        }
+
+        function fillFieldConfiguration(){
+            $.each(self.currentFieldToEdit.form, function (index, element) {
+                if (element.field == 'required' && element.value.toString() == "true") {
+                    $('[name="' + element.field + '"]').prop('checked', true);
+                }
+                else if (element.field == 'options') {
+                    element.value.forEach(function (optval) {
+                        self.tempOptions.push(optval);
+
+                        $('.option-table').find('tbody').append('<tr>' +
+                            '<td>' + optval + '</td>' +
+                            '<td> <button class="btn btn-danger btn-remove-option"><i class="fa fa-remove"></i> remove</button></td></tr>');
+                    });
+                }
+                else {
+                    $('[name="' + element.field + '"]').val(element.value);
+                }
+            });
         }
 
         /**
@@ -194,46 +227,23 @@
             self.element.find('.form-field-configure').slideDown();
         }
 
-        function fillFieldEdition(fieldId) {
-
+        function getFieldconfiguration(fieldId){
             var fieldToEdit = $.grep(self.fields, function (element, index) {
                 return element['_id'] === fieldId;
             });
 
-            self.currentFieldToEdit = fieldToEdit[0];
-
-            openModal(false);
-            renderFieldTemplate(fieldToEdit[0].type);
-
-            self.isEdit = {id: fieldToEdit[0]._id, type: fieldToEdit[0].type}
+            return fieldToEdit[0];
         }
 
         function generateTempId() {
             return Math.floor(Math.random() * 26) + Date.now();
         }
 
-        function openModal(isNew) {
-            if (isNew) {
-
-                self.divModal.modal('show');
-                self.element.trigger('showing-type-field');
-            }
-            else { //edición
-                self.element.find('.select-form-field-type').hide();
-                self.element.find('.form-field-configure').show();
-                self.divModal.modal('show');
-            }
-        }
-
-
-        // /** corrige los comportamientos de GigSelect para un select comun **/
-        // function fixGigSelect() {
-        //     self.element.find('select').children('option').css('display', 'block');
-        // }
 
         function cancelChanges() {
             self.tempOptions = [];
             self.currentFieldType = null;
+            self.currentFieldToEdit = null;
             self.closeModal();
         }
 
@@ -285,19 +295,19 @@
             var changesToSubmit = {form: changes, type: self.currentFieldType};
 
 
-            if (self.isEdit) {
-                // changesToSubmit.type = self.isEdit.type;
-                //
-                // updateFieldList('update', changesToSubmit, self.isEdit.id);
-                self.element.trigger('field-updated', changesToSubmit);
-                self.isEdit = false;
+            if(self.currentFieldToEdit != null){
+                self.element.trigger('field-updated', {current: self.currentFieldToEdit, updated: changesToSubmit});
+                self.currentFieldToEdit = null;
             } else {
                 self.element.trigger('field-added', changesToSubmit);
             }
-
         }
 
+        function removeEmptyMessage(){
+            self.element.find('.field-list-table').find('tbody').find('.alert-info').parent().hide();
+        }
         function updateFieldList(update, data, id) {
+            removeEmptyMessage();
             var tbody = self.element.find('.field-list-table').find('tbody');
 
             if (update == 'add') {
